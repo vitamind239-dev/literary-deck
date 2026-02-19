@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Литературная колода</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 24px; background: #0b0c10; color: #eaeaea; }
+    .wrap { max-width: 780px; margin: 0 auto; }
+    .card { border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 22px; background: rgba(255,255,255,.04); }
+    .quote { font-size: 22px; line-height: 1.35; margin: 0 0 14px; }
+    .meta { opacity: .8; font-size: 14px; }
+    button { margin-top: 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #eaeaea; cursor: pointer; }
+    button:hover { background: rgba(255,255,255,.10); }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .hint { margin-top: 12px; opacity: .7; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <p id="quote" class="quote">Нажми “Тянуть карту”.</p>
+      <div id="meta" class="meta"></div>
+      <div class="row">
+        <button id="draw">Тянуть карту</button>
+        <button id="copy" disabled>Копировать</button>
+        <button id="share" disabled>Поделиться</button>
+      </div>
+      <div class="hint" id="hint"></div>
+    </div>
+  </div>
+
+  <script>
+    const deck = [
+      { text: "Рукописи не горят.", author: "М. Булгаков", work: "«Мастер и Маргарита»" },
+      { text: "Человека можно уничтожить, но его нельзя победить.", author: "Э. Хемингуэй", work: "часто цитируют" },
+      { text: "Зорко одно лишь сердце. Самого главного глазами не увидишь.", author: "А. де Сент-Экзюпери", work: "«Маленький принц»" },
+      { text: "Пока человек способен ждать — он жив.", author: "Э. М. Ремарк", work: "часто цитируют" },
+      { text: "Трусость — самый страшный порок.", author: "М. Булгаков", work: "«Мастер и Маргарита»" },
+      { text: "Ты навсегда в ответе за тех, кого приручил.", author: "А. де Сент-Экзюпери", work: "«Маленький принц»" },
+      { text: "Мир ломает каждого, и многие потом только крепче на изломе.", author: "Э. Хемингуэй", work: "часто цитируют" },
+      { text: "Самое важное в жизни — не потерять себя.", author: "Э. М. Ремарк", work: "часто цитируют" },
+      { text: "Всё будет правильно, на этом построен мир.", author: "М. Булгаков", work: "часто цитируют" },
+      { text: "Никогда и ничего не просите. Сами предложат и сами всё дадут.", author: "М. Булгаков", work: "«Мастер и Маргарита»" },
+      { text: "Смысл жизни в том, на что она потрачена.", author: "А. де Сент-Экзюпери", work: "часто цитируют" },
+      { text: "Есть только одна настоящая ценность — это связь человека с человеком.", author: "А. де Сент-Экзюпери", work: "часто цитируют" },
+      { text: "Праздник всегда с тобой.", author: "Э. Хемингуэй", work: "часто цитируют" },
+      { text: "Счастье — это когда тебя понимают.", author: "Э. М. Ремарк", work: "часто цитируют" },
+      { text: "Люди как люди. Любят деньги, но ведь это всегда было…", author: "М. Булгаков", work: "«Мастер и Маргарита»" },
+      { text: "Все взрослые сначала были детьми, только мало кто из них об этом помнит.", author: "А. де Сент-Экзюпери", work: "«Маленький принц»" },
+    ];
+
+    const $quote = document.getElementById("quote");
+    const $meta  = document.getElementById("meta");
+    const $hint  = document.getElementById("hint");
+    const $draw  = document.getElementById("draw");
+    const $copy  = document.getElementById("copy");
+    const $share = document.getElementById("share");
+
+    let current = null;
+
+    function drawCard() {
+      const idx = Math.floor(Math.random() * deck.length);
+      current = deck[idx];
+      $quote.textContent = "«" + current.text + "»";
+      $meta.textContent = `${current.author} — ${current.work}`;
+      $hint.textContent = "";
+      $copy.disabled = false;
+      $share.disabled = false;
+    }
+
+    async function copyCard() {
+      if (!current) return;
+      const text = `${current.text}\n— ${current.author}, ${current.work}`;
+      await navigator.clipboard.writeText(text);
+      $hint.textContent = "Скопировано.";
+    }
+
+    async function shareCard() {
+      if (!current) return;
+      const text = `${current.text} — ${current.author}`;
+      if (navigator.share) {
+        await navigator.share({ text, title: "Литературная колода" });
+      } else {
+        await copyCard();
+        $hint.textContent = "Поделиться не поддерживается, текст скопирован.";
+      }
+    }
+
+    $draw.addEventListener("click", drawCard);
+    $copy.addEventListener("click", () => copyCard().catch(() => $hint.textContent = "Не удалось скопировать."));
+    $share.addEventListener("click", () => shareCard().catch(() => $hint.textContent = "Не удалось поделиться."));
+  </script>
+</body>
+</html>
